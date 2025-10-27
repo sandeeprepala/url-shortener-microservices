@@ -16,6 +16,7 @@ import {
   Line,
   Legend
 } from 'recharts';
+import TopToday from './TopToday';
 
 const Analytics = () => {
   const [shortCode, setShortCode] = useState("");
@@ -91,9 +92,10 @@ const Analytics = () => {
   };
 
   return (
-    <div className="analytics-container">
+    <>
+      <div className="analytics-container">
       <div className="card analytics-card">
-        <h3>Analytics Dashboard</h3>
+       <h3 style={{ borderRadius: "10px" }}>ScaleURL Analytics</h3>
         <div className="search-section">
           <input
             type="text"
@@ -253,7 +255,10 @@ const Analytics = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+      {/* Top today charts placed below the analytics dashboard */}
+      <TopToday />
+    </>
   );
 };
 

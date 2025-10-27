@@ -44,6 +44,11 @@ body {
   flex-direction: column;
 }
 
+.container {
+  flex: 1;
+  width: 100%;
+}
+
 .topbar {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
@@ -218,18 +223,6 @@ body {
   font-size: 0.875rem;
   color: var(--text-secondary);
   font-weight: 500;
-}
-
-/* Smaller, wrapped original URL within stat cards */
-.stat-value.small-url {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  word-break: break-word;
-  white-space: normal;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  line-height: 1.2;
 }
 
 /* Chart Sections */
