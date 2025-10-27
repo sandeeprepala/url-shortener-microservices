@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import redisClient from "../../url-service/config/redis.js";
 import Url from "./model/urlModel.js";
+import cors from "cors"
 
 dotenv.config();
 
@@ -10,6 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 8002;
 
 app.use(express.json());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
 
 // Ensure MONGO_URI is present
 if (!process.env.MONGO_URI) {
