@@ -25,7 +25,7 @@ export const shortenUrl = async (req, res) => {
     }
 
     // 🌐 Construct short URL (based on frontend or backend domain)
-    const baseUrl = process.env.BASE_URL || "http://tinyUrl";
+    const baseUrl = process.env.BASE_URL || "http://ScaleURL";
     const shortUrl = `${baseUrl}/${shortCode}`;
 
     // 🗃 Save to MongoDB
