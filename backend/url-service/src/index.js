@@ -18,7 +18,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use("/api/v1/url", router);
+app.use("/", router);
 
 // Default route
 app.get("/", (req, res) => {
