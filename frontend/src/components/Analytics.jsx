@@ -11,7 +11,10 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  LineChart,
+  Line,
+  Legend
 } from 'recharts';
 
 const Analytics = () => {
@@ -65,22 +68,42 @@ const Analytics = () => {
     }));
   };
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+  const COLORS = ['#0ea5e9', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          background: 'white',
+          padding: '12px 16px',
+          borderRadius: '10px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{label}</p>
+          <p style={{ margin: '4px 0 0', color: '#0ea5e9', fontWeight: 600 }}>
+            {payload[0].value} visits
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="analytics-container">
       <div className="card analytics-card">
-        <h3>📈 Advanced Analytics</h3>
+        <h3>Analytics Dashboard</h3>
         <div className="search-section">
           <input
             type="text"
-            placeholder="Enter short code (e.g., abc123)"
+            placeholder="Enter short code to view analytics"
             value={shortCode}
             onChange={(e) => setShortCode(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && fetchAnalytics()}
           />
           <button onClick={fetchAnalytics} disabled={loading}>
-            {loading ? 'Loading...' : 'Get Analytics'}
+            {loading ? 'Loading...' : 'View Analytics'}
           </button>
         </div>
 
@@ -122,13 +145,27 @@ const Analytics = () => {
               <div className="chart-section">
                 <h4>Daily Visits Trend</h4>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getDailyVisitsData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="visits" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                  </BarChart>
+                  <LineChart data={getDailyVisitsData()}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#64748b"
+                      style={{ fontSize: '0.875rem' }}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      style={{ fontSize: '0.875rem' }}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line
+                      type="monotone"
+                      dataKey="visits"
+                      stroke="#0ea5e9"
+                      strokeWidth={3}
+                      dot={{ fill: '#0ea5e9', strokeWidth: 2, r: 5 }}
+                      activeDot={{ r: 7 }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
@@ -139,17 +176,18 @@ const Analytics = () => {
               {getReferrerData().length > 0 && (
                 <div className="chart-card">
                   <h4>Traffic Sources</h4>
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                       <Pie
                         data={getReferrerData()}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
-                        outerRadius={80}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={90}
                         fill="#8884d8"
                         dataKey="value"
+                        paddingAngle={2}
                       >
                         {getReferrerData().map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -164,18 +202,19 @@ const Analytics = () => {
               {/* Devices Pie Chart */}
               {getDeviceData().length > 0 && (
                 <div className="chart-card">
-                  <h4>Devices</h4>
-                  <ResponsiveContainer width="100%" height={250}>
+                  <h4>Devices Distribution</h4>
+                  <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                       <Pie
                         data={getDeviceData()}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
-                        outerRadius={80}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={90}
                         fill="#8884d8"
                         dataKey="value"
+                        paddingAngle={2}
                       >
                         {getDeviceData().map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

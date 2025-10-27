@@ -12,12 +12,12 @@ const App = () => {
             <div className="brand">
               <div className="brand-mark">🔗</div>
               <div>
-                <div className="brand-title">TinyMetrics</div>
-                <div className="brand-sub">Professional URL Shortener & Analytics</div>
+                <div className="brand-title">LinkMetrics</div>
+                <div className="brand-sub">URL Shortener & Analytics Platform</div>
               </div>
             </div>
             <nav className="top-actions">
-              <a href="#" className="btn btn-ghost">Docs</a>
+              <a href="#features" className="btn btn-ghost">Features</a>
             </nav>
           </div>
         </header>
