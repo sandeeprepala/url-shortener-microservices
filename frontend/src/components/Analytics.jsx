@@ -125,9 +125,9 @@ const Analytics = () => {
               </div>
               <div className="stat-card">
                 <div className="stat-icon">🔗</div>
-                <div className="stat-value">
-                  {analyticsData.originalUrl?.length > 40 
-                    ? `${analyticsData.originalUrl.substring(0, 40)}...`
+                <div className="stat-value small-url">
+                  {analyticsData.originalUrl?.length > 80 
+                    ? `${analyticsData.originalUrl.substring(0, 80)}...`
                     : analyticsData.originalUrl
                   }
                 </div>
@@ -144,7 +144,7 @@ const Analytics = () => {
             {getDailyVisitsData().length > 0 && (
               <div className="chart-section">
                 <h4>Daily Visits Trend</h4>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={getDailyVisitsData()}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis
@@ -176,7 +176,7 @@ const Analytics = () => {
               {getReferrerData().length > 0 && (
                 <div className="chart-card">
                   <h4>Traffic Sources</h4>
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
                       <Pie
                         data={getReferrerData()}
@@ -203,7 +203,7 @@ const Analytics = () => {
               {getDeviceData().length > 0 && (
                 <div className="chart-card">
                   <h4>Devices Distribution</h4>
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
                       <Pie
                         data={getDeviceData()}

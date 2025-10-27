@@ -115,7 +115,8 @@ body {
   max-width: 1400px;
   margin: 40px auto;
   display: grid;
-  grid-template-columns: 1fr 480px;
+  /* left flexible, right analytics panel gets a minimum width for charts */
+  grid-template-columns: 1fr minmax(360px, 560px);
   gap: 32px;
   align-items: start;
   padding: 0 32px;
@@ -177,9 +178,9 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 20px 24px;
   background: var(--background-color);
 }
 
@@ -219,6 +220,18 @@ body {
   font-weight: 500;
 }
 
+/* Smaller, wrapped original URL within stat cards */
+.stat-value.small-url {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
 /* Chart Sections */
 .chart-section {
   padding: 28px;
@@ -236,19 +249,25 @@ body {
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  padding: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  padding: 16px 20px;
   background: var(--background-color);
 }
 
 .chart-card {
   background: var(--surface-color);
-  padding: 24px;
-  border-radius: 14px;
+  padding: 16px;
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
   transition: var(--transition);
+}
+
+/* Ensure recharts containers fill card area nicely */
+.chart-card .recharts-wrapper {
+  width: 100% !important;
+  height: 220px !important;
 }
 
 .chart-card:hover {

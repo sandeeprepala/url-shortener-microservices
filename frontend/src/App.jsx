@@ -1,7 +1,8 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import UrlForm from "./components/UrlForm";
 import Analytics from "./components/Analytics";
+import Features from "./components/Features";
 
 const App = () => {
   return (
@@ -12,12 +13,12 @@ const App = () => {
             <div className="brand">
               <div className="brand-mark">🔗</div>
               <div>
-                <div className="brand-title">LinkMetrics</div>
-                <div className="brand-sub">URL Shortener & Analytics Platform</div>
+                <div className="brand-title">ScaleURL</div>
+                <div className="brand-sub">URL Shortener</div>
               </div>
             </div>
             <nav className="top-actions">
-              <a href="#features" className="btn btn-ghost">Features</a>
+              <Link to="/features" className="btn btn-ghost">Features</Link>
             </nav>
           </div>
         </header>
@@ -32,6 +33,7 @@ const App = () => {
                 <Analytics />
               </div>
             </>} />
+            <Route path="/features" element={<Features />} />
           </Routes>
         </main>
       </div>
