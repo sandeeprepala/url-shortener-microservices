@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import redisClient from "../../url-service/config/redis.js";
+import redisClient from "../config/redis.js";
 import Url from "./model/urlModel.js";
 import cors from "cors"
 
