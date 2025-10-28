@@ -114,20 +114,20 @@ const Analytics = () => {
             {/* Overview Cards */}
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon">👆</div>
-                <div className="stat-value">{analyticsData.visitCount}</div>
+                <div className="stat-icon" style={{ fontSize: '1.875rem' }}>👆</div>
+                <div className="stat-value" style={{ fontSize: '0.975rem' }}>{analyticsData.visitCount}</div>
                 <div className="stat-label">Total Visits</div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">📅</div>
-                <div className="stat-value">
+                <div className="stat-icon" style={{ fontSize: '1.875rem' }}>📅</div>
+                <div className="stat-value" style={{ fontSize: '0.975rem' }} >
                   {new Date(analyticsData.createdAt).toLocaleDateString()}
                 </div>
                 <div className="stat-label">Created Date</div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">🔗</div>
-                <div className="stat-value small-url">
+                <div className="stat-icon" style={{ fontSize: '1.875rem' }}>🔗</div>
+                <div className="stat-value small-url" style={{ fontSize: '0.675rem' }}>
                   {analyticsData.originalUrl?.length > 80 
                     ? `${analyticsData.originalUrl.substring(0, 80)}...`
                     : analyticsData.originalUrl
@@ -136,8 +136,8 @@ const Analytics = () => {
                 <div className="stat-label">Original URL</div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">🆔</div>
-                <div className="stat-value">{analyticsData.shortCode}</div>
+                <div className="stat-icon" style={{ fontSize: '1.875rem' }}>🆔</div>
+                <div className="stat-value" style={{ fontSize: '0.975rem' }}>{analyticsData.shortCode}</div>
                 <div className="stat-label">Short Code</div>
               </div>
             </div>
