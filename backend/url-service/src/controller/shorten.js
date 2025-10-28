@@ -34,8 +34,9 @@ export const shortenUrl = async (req, res) => {
       shortCode,
     });
 
-    // ⚡ Cache immediately
-    await redisClient.set(shortCode, originalUrl);
+  // ⚡ Cache immediately with 24 hours TTL
+  // Use SETEX to ensure the cache entry expires after 24 hours (24*60*60 seconds)
+  await redisClient.setEx(shortCode, 24 * 60 * 60, originalUrl);
 
     return res.status(201).json({
       message: "Short URL created successfully",
@@ -102,8 +103,8 @@ export const redirectToOriginal = async (req, res) => {
       return res.status(404).json({ error: "Short URL not found" });
     }
 
-    // 3️⃣ Cache the URL for future requests
-    await redisClient.set(code, urlDoc.originalUrl);
+  // 3️⃣ Cache the URL for future requests with 24 hours TTL
+  await redisClient.setEx(code, 24 * 60 * 60, urlDoc.originalUrl);
 
     // 4️⃣ Push visit event to queue
     await redisClient.rPush("visitQueue", JSON.stringify({ shortCode: code, timestamp: Date.now() }));
