@@ -1,7 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import redisClient from "../config/redis.js";
 import Url from "./model/urlModel.js";
 import cors from "cors";
 
@@ -22,35 +21,20 @@ if (!process.env.MONGO_URI) {
   process.exit(1);
 }
 
-// ✅ Background queue processor
+// ✅ Background Queue Processor (you can reattach Redis queue later if needed)
 async function processQueue() {
-  console.log("📥 Listening to Redis visitQueue...");
-
-  while (true) {
-    try {
-      const data = await redisClient.blPop("visitQueue", 0);
-      if (!data) continue;
-
-      const message = JSON.parse(data.element);
-      const { shortCode } = message;
-
-      console.log(`🔹 Processing visit for: ${shortCode}`);
-
-      await Url.findOneAndUpdate(
-        { shortCode },
-        { $inc: { visitCount: 1 } },
-        { new: true }
-      );
-    } catch (error) {
-      console.error("❌ Error processing queue:", error);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-  }
+  console.log("📥 Visit queue processor initialized (Redis queue removed).");
+  // Left placeholder if you reintroduce message queue logic later
 }
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log("✅ Analytics service connected to MongoDB");
+
+    // Ensure indexes exist before serving traffic
+    await Url.syncIndexes();
+    console.log("⚙️ MongoDB indexes synced successfully.");
+
     processQueue();
 
     // ✅ Health check
@@ -58,11 +42,11 @@ mongoose.connect(process.env.MONGO_URI)
       res.send("📊 Analytics Service is Running...");
     });
 
-    // ✅ Get analytics for one shortCode
+    // ✅ Get analytics by shortCode
     app.get("/analytics/:shortCode", async (req, res) => {
       try {
         const { shortCode } = req.params;
-        const urlData = await Url.findOne({ shortCode });
+        const urlData = await Url.findOne({ shortCode }).lean();
 
         if (!urlData) {
           return res.status(404).json({ error: "Short URL not found" });
@@ -83,18 +67,16 @@ mongoose.connect(process.env.MONGO_URI)
       }
     });
 
-    // ✅ NEW ROUTE: Get Top 10 most clicked links of today
+    // ✅ Get top 10 most clicked links today
     app.get("/analytics/top/today", async (req, res) => {
       try {
-        // Get start and end of today
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
-        // Fetch top 10 URLs created today with highest visitCount
         const topUrls = await Url.find({
-          createdAt: { $gte: startOfDay, $lte: endOfDay }
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
         })
           .sort({ visitCount: -1 })
           .limit(10)
