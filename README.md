@@ -10,11 +10,9 @@ This README explains how the system works, how to run it locally, deployment and
 
 ---
 
-## Architecture Diagram
+## 🧠Architecture Diagram
 
 ![TinyMetrics Architecture](assets/architecture-url.jpg)
-
---
 
 ## Contents
 
