@@ -2,8 +2,6 @@
 
 This repository contains a microservices-based URL shortener with analytics. It is split into multiple services:
 
-![TinyMetrics Architecture](assets/architecture-url.jpg)
-
 - backend/url-service — primary service that creates short URLs, serves redirects, caches redirects in Redis, and enqueues visit events.
 - backend/analytics-service — background worker that consumes visit events from Redis and updates analytics in MongoDB.
 - frontend — React single-page app with URL creation UI and analytics dashboard (Recharts).
@@ -11,6 +9,12 @@ This repository contains a microservices-based URL shortener with analytics. It 
 This README explains how the system works, how to run it locally, deployment and scaling recommendations, and backend optimizations used.
 
 ---
+
+## Architecture Diagram
+
+![TinyMetrics Architecture](assets/architecture-url.jpg)
+
+--
 
 ## Contents
 
