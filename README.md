@@ -1,4 +1,4 @@
-# ScaleURL — URL Shortener
+# 🚀ScaleURL — URL Shortener
 
 This repository contains a microservices-based URL shortener with analytics. It is split into multiple services:
 
