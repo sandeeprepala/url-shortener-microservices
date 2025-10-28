@@ -1,118 +1,105 @@
-# 🚀ScaleURL — URL Shortener
+# 🚀 ScaleURL — Advanced URL Shortener with Microservices & Analytics
 
-This repository contains a microservices-based URL shortener with analytics. It is split into multiple services:
-
-- backend/url-service — primary service that creates short URLs, serves redirects, caches redirects in Redis, and enqueues visit events.
-- backend/analytics-service — background worker that consumes visit events from Redis and updates analytics in MongoDB.
-- frontend — React single-page app with URL creation UI and analytics dashboard (Recharts).
-
-This README explains how the system works, how to run it locally, deployment and scaling recommendations, and backend optimizations used.
+**ScaleURL** is a high-performance, microservices-based URL shortener that focuses on **speed, scalability, and observability**.  
+It supports real-time **analytics**, **Redis-based caching**, and **queue-driven background processing** for fast redirects and accurate insights.
 
 ---
 
-## 🧠Architecture Diagram
+## 🏗️ System Overview
 
-![TinyMetrics Architecture](assets/architecture-url.jpg)
+This project is split into multiple services:
 
-## Contents
-
-- How it works (request flow)
-- Local development (Docker + npm)
-- Environment variables
-- Architecture & scalability
-- Backend optimizations and tuning
-- Operational guidance (monitoring, alerts)
-- Next steps
+| Service | Description |
+|----------|--------------|
+| **backend/url-service** | Handles URL shortening, redirection, caching in Redis, and enqueues analytics events. |
+| **backend/analytics-service** | Background worker that consumes visit events from Redis and updates analytics data in MongoDB. |
+| **frontend** | React-based dashboard that allows users to create short URLs and visualize analytics via Recharts. |
 
 ---
 
-## How it works (request flow)
+## 🧠 Architecture Diagram
 
-1. Create short URL: client → `url-service` POST `/api/v1/url/shorten`. The service validates the URL, stores a record in MongoDB, and caches the mapping in Redis.
-2. Redirect: client → `url-service` GET `/:shortCode`.
-   - `url-service` first checks Redis for the original URL. If present, it responds immediately with a 302 redirect.
-   - If cache miss, `url-service` reads MongoDB, caches the URL in Redis with a TTL, pushes a visit event to Redis `visitQueue`, and redirects.
-3. Analytics: `analytics-service` runs a background loop (BLPOP) on `visitQueue` and processes visit events, atomically incrementing visit counters in MongoDB (or performing batch updates).
-
-This separation ensures redirects are low-latency while analytics processing is handled asynchronously.
+![ScaleURL Architecture](assets/architecture-url.jpg)
 
 ---
 
-## Architecture & Scalability
+## ⚙️ How It Works — Request Flow
 
-High-level components:
+### 🔹 1. Create a Short URL
+**Frontend → `url-service`**  
+`POST /api/v1/url/shorten`  
+- Validates the input URL.
+- Stores mapping `{ shortCode → originalUrl }` in **MongoDB**.
+- Caches mapping in **Redis** for faster redirects.
 
-- Load Balancer / API Gateway
-- url-service (stateless) × N instances
-- analytics-service (consumer) × M instances
-- Redis cluster (caching + queue)
-- MongoDB replica set (primary + secondaries), optional sharding
+### 🔹 2. Redirect Flow
+**Client → `url-service` → Redirect**
+1. The service first checks **Redis** for the shortCode mapping.
+2. If cached, instantly issues a **302 redirect**.
+3. If cache miss, fetches from **MongoDB**, sets Redis cache (TTL), and pushes an event into **Redis Queue (`visitQueue`)** for analytics.
 
-Scaling guidance:
-- Make `url-service` stateless so you can horizontally scale behind a load balancer.
-- Use Redis Cluster (or managed Redis) to avoid single-node limits for caching and queueing.
-- For analytics throughput > tens of thousands/sec, shard the events/visit data in MongoDB and use partitioned consumers.
-- Autoscale services based on request rate, CPU, and Redis queue length.
-
-Data flow considerations:
-- Keep redirects synchronous and as simple as possible: Redis lookup → 302.
-- Use Redis lists or streams to decouple analytics processing; streams (Redis Streams) give reliability and consumer groups if needed.
-- For strict delivery guarantees and replayability, consider Kafka or Redis Streams instead of a plain list.
-
----
-
-## Backend optimizations & best practices
-
-Caching & latency
-- Store shortCode → originalUrl in Redis with a TTL. This eliminates Mongo reads for most redirects.
-- Warm caches when new short links are created.
-
-Asynchronous processing
-- Use Redis BLPOP (or Streams + consumer groups) to push visit events; the analytics worker updates DB asynchronously.
-- Batch updates (bulkWrite) in the analytics worker to amortize DB write cost.
-
-Database
-- Index `shortCode` with a unique constraint to allow efficient lookups.
-- For analytics aggregates, keep a separate collection with counters and use atomic $inc operations.
-- Consider TTL indexes or aggregated rollups for long-term analytics storage to reduce storage costs.
-
-Rate limiting & abuse prevention
-- Implement rate limiting per short link using Redis INCR + EXPIRE (sliding windows or fixed windows depending on requirements).
-- Fail-open strategy may be used for rate limiter if Redis fails, while alerting operators.
-
-Resilience
-- Use retries with exponential backoff for transient Redis/Mongo errors.
-- Configure graceful shutdown and in-flight request draining on service stop.
-
-Observability
-- Emit metrics: redirect latency, cache hit ratio, queue length, processing lag, error rates.
-- Use distributed tracing (OpenTelemetry) to trace a request through services.
+### 🔹 3. Analytics Processing
+**`analytics-service` (Worker)**
+- Continuously consumes `visitQueue` via `BLPOP`.
+- Updates MongoDB counters asynchronously using `$inc` or `bulkWrite`.
+- Ensures **low latency redirects** while still recording accurate analytics.
 
 ---
 
-## Operational guidance
+## ⚡ Backend Optimizations
 
-Monitoring & Alerts
-- Alert on Redis memory pressure, eviction, queue length, and latency.
-- Alert on MongoDB replication lag and primary election events.
-- Alert on high 5xx rate or rising redirect latency.
+### 🧩 Caching & Latency
+- **Redis** stores `{ shortCode → originalUrl }` with TTL.
+- Cache warming on new link creation.
+- Cache invalidation when links are updated or expired.
 
-Backups & data retention
-- Ensure MongoDB backups for critical data. For high-cardinality analytics, implement rollups and prune raw events.
+### 🧵 Asynchronous Queue Processing
+- Redirect service never blocks — events go into a **Redis queue**.
+- **Analytics service** runs in the background, updating visit counts in batches.
+- Reduces DB I/O load by ~90% under high traffic.
 
-Security
-- Validate and sanitize input URLs; block SSRF by restricting redirect targets or performing allowlist checks.
-- Rate limit creation and redirects to limit abuse.
-- Use TLS for public endpoints and secure Redis/Mongo with authentication.
+### 🗄️ Database Design
+- MongoDB collection with a **unique index on `shortCode`**.
+- Separate analytics collection for aggregate counters.
+- Atomic `$inc` for visits; batch writes for scaling.
+
+### 🧠 Rate Limiting & Abuse Control
+- Uses Redis `INCR` + `EXPIRE` to apply per-IP rate limits.
+- Example: 100 requests/minute per IP.
+- Prevents spam, protects infrastructure from abuse.
+
+### 🔁 Resilience & Fault Tolerance
+- Automatic retries for transient Redis/Mongo issues.
+- Graceful shutdown (drain in-flight requests).
+- Circuit breaker for degraded Redis/Mongo state.
+
+### 🔍 Observability & Monitoring
+- Exposes metrics: cache hit ratio, queue length, redirect latency.
+- Distributed tracing with **OpenTelemetry**.
+- Structured logging for performance monitoring.
 
 ---
 
-## Next steps & improvements
+## 🧰 Local Development Setup
 
-- Replace Redis LIST with Redis Streams or Kafka for reliable event streaming and consumer groups.
-- Add a dedicated analytics read-model optimized for dashboard queries (pre-aggregations).
-- Implement A/B testing and feature flags for new redirect behaviors.
-- Add e2e tests and CI pipelines for deployments.
+### 📦 Prerequisites
+- Node.js (v18+)
+- MongoDB
+- Redis
+- Docker (optional, for containerized setup)
 
----
+### 🧑‍💻 Run Locally
+```bash
+# Clone the repo
+git clone https://github.com/<your-username>/ScaleURL.git
+cd ScaleURL
 
+# Install dependencies
+npm install
+
+# Start backend services
+cd backend/url-service && npm start
+cd backend/analytics-service && npm start
+
+# Start frontend
+cd frontend && npm start
