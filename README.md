@@ -2,7 +2,7 @@
 
 This repository contains a microservices-based URL shortener with analytics. It is split into multiple services:
 
-![TinyMetrics Architecture](assets/url_shortner.jpeg)
+![TinyMetrics Architecture](assets/url_shortner.png)
 
 - backend/url-service — primary service that creates short URLs, serves redirects, caches redirects in Redis, and enqueues visit events.
 - backend/analytics-service — background worker that consumes visit events from Redis and updates analytics in MongoDB.
