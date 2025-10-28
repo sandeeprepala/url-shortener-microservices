@@ -38,59 +38,6 @@ This separation ensures redirects are low-latency while analytics processing is 
 
 ---
 
-## Local development
-
-Prerequisites:
-- Node.js (v18+ recommended)
-- npm
-- Docker (for Redis and MongoDB if you don't run them locally)
-
-Quick start (PowerShell):
-
-```powershell
-# from repo root
-# 1) Start Redis and MongoDB (use Docker)
-docker run -d --name tiny_redis -p 6379:6379 redis:7
-docker run -d --name tiny_mongo -p 27017:27017 mongo:6
-
-# 2) Start backend services (in separate terminals)
-cd backend/url-service
-npm install
-# set environment variables (or use a .env file)
-$env:MONGO_URI = "mongodb://localhost:27017/tinymetrics"
-$env:REDIS_URL = "redis://localhost:6379"
-npm run dev
-
-cd ../analytics-service
-npm install
-# analytics-service expects same REDIS_URL and MONGO_URI
-$env:MONGO_URI = "mongodb://localhost:27017/tinymetrics"
-$env:REDIS_URL = "redis://localhost:6379"
-npm run dev
-
-# 3) Start frontend
-cd ../../frontend
-npm install
-npm run dev
-```
-
-Open the frontend URL (Vite shows the port, typically http://localhost:5173). Create a short URL and then fetch analytics in the right-panel.
-
----
-
-## Environment variables
-
-Common variables used by services:
-
-- MONGO_URI — connection string for MongoDB (e.g. mongodb://host:27017/tinymetrics)
-- REDIS_URL — connection string for Redis (e.g. redis://host:6379)
-- PORT — optional service port override
-- BASE_URL — front-end or canonical base URL used in short links (optional)
-
-Each service may also have its own .env in their folders. Keep secrets secure and out of version control.
-
----
-
 ## Architecture & Scalability
 
 High-level components:
@@ -169,25 +116,3 @@ Security
 
 ---
 
-## Contributing
-
-Please open PRs against `main`. Add tests for behavior changes and keep environment changes configurable via .env files.
-
----
-
-If you'd like, I can:
-- Add deploy manifests (Docker Compose, Kubernetes / Helm, or GitHub Actions workflows).
-- Add monitoring scaffold (Prometheus config + Grafana dashboards) and example alerts.
-  
-### Future work (monitoring & autoscaling)
-
-Monitoring, observability, and autoscaling are planned as future scope for this project. Recommended next steps:
-
-- Export Prometheus metrics from services (redirect latency, cache hit rate, queue length) and build Grafana dashboards.
-- Add distributed tracing (OpenTelemetry) to trace requests across `url-service` and `analytics-service`.
-- Configure autoscaling rules (HPA for Kubernetes or cloud autoscaling) based on CPU, memory, and Redis queue length.
-- Create runbooks and alerting rules for Redis/Mongo incidents and consumer lag.
-
-These items are intentionally left as future work to implement in the production deployment phase.
-
-*** End of README ***
