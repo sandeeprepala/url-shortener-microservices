@@ -30,7 +30,7 @@ const TopAnalytics = () => {
     setLoading(true);
     try {
       // You can modify the endpoint based on timeRange if you add that functionality
-      const res = await api1.get('/analytics/top/today');
+      const res = await api1.get(`/analytics/top/${timeRange}`);
       if (res.data && res.data.topUrls) {
         setTopUrls(res.data.topUrls);
       }

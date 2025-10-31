@@ -92,30 +92,54 @@ mongoose.connect(process.env.MONGO_URI)
     });
 
     // ✅ Get top 10 most clicked links today
-    app.get("/analytics/top/today", async (req, res) => {
-      try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+    app.get("/analytics/top/:range", async (req, res) => {
+  try {
+    const { range } = req.params;
+    const now = new Date();
+    let start, end = new Date();
 
-        const topUrls = await Url.find({
-          createdAt: { $gte: startOfDay, $lte: endOfDay },
-        })
-          .sort({ visitCount: -1 })
-          .limit(10)
-          .select("shortCode originalUrl visitCount createdAt -_id");
+    // Define date ranges
+    if (range === "today") {
+      start = new Date();
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+    } 
+    else if (range === "week") {
+      // Get Monday as the start of the week
+      const day = now.getDay(); // 0 (Sun) - 6 (Sat)
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      start = new Date(now.setDate(diff));
+      start.setHours(0, 0, 0, 0);
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    } 
+    else if (range === "month") {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } 
+    else {
+      return res.status(400).json({ error: "Invalid range parameter" });
+    }
 
-        res.status(200).json({
-          success: true,
-          count: topUrls.length,
-          topUrls,
-        });
-      } catch (error) {
-        console.error("❌ Error fetching top URLs:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-      }
+    const topUrls = await Url.find({
+      createdAt: { $gte: start, $lte: end },
+    })
+      .sort({ visitCount: -1 })
+      .limit(10)
+      .select("shortCode originalUrl visitCount createdAt -_id");
+
+    res.status(200).json({
+      success: true,
+      range,
+      count: topUrls.length,
+      topUrls,
     });
+  } catch (error) {
+    console.error("❌ Error fetching top URLs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
     app.listen(PORT, () => {
       console.log(`🚀 Analytics service running on port ${PORT}`);
