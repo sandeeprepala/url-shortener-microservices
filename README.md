@@ -1,4 +1,4 @@
-# 🚀 ScaleURL — Advanced URL Shortener with Microservices & Analytics
+# 🚀 ScaleURL — Scalable URL Shortener
 
 **ScaleURL** is a high-performance, microservices-based URL shortener that focuses on **speed, scalability, and observability**.  
 It supports real-time **analytics**, **Redis-based caching**, and **queue-driven background processing** for fast redirects and accurate insights.
