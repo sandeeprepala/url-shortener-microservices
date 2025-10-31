@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Url from "./model/urlModel.js";
 import cors from "cors";
+import redisClient from "../config/redis.js";
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ if (!process.env.MONGO_URI) {
 // ✅ Background Queue Processor (you can reattach Redis queue later if needed)
 async function processQueue() {
   console.log("📥 Listening to Redis visitQueue...");
+  console.log("📥 Visit queue processor initialized (Redis queue removed).");
+  // Left placeholder if you reintroduce message queue logic later
 
   while (true) {
     try {
@@ -45,8 +48,7 @@ async function processQueue() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
-  console.log("📥 Visit queue processor initialized (Redis queue removed).");
-  // Left placeholder if you reintroduce message queue logic later
+  
 }
 
 mongoose.connect(process.env.MONGO_URI)
