@@ -23,6 +23,28 @@ if (!process.env.MONGO_URI) {
 
 // ✅ Background Queue Processor (you can reattach Redis queue later if needed)
 async function processQueue() {
+  console.log("📥 Listening to Redis visitQueue...");
+
+  while (true) {
+    try {
+      const data = await redisClient.blPop("visitQueue", 0);
+      if (!data) continue;
+
+      const message = JSON.parse(data.element);
+      const { shortCode } = message;
+
+      console.log(`🔹 Processing visit for: ${shortCode}`);
+
+      await Url.findOneAndUpdate(
+        { shortCode },
+        { $inc: { visitCount: 1 } },
+        { new: true }
+      );
+    } catch (error) {
+      console.error("❌ Error processing queue:", error);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
   console.log("📥 Visit queue processor initialized (Redis queue removed).");
   // Left placeholder if you reintroduce message queue logic later
 }
